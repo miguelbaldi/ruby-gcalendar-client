@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby -w
+require "rubygems"
+require "simpleconsole"
+#require File.dirname(__FILE__) + "/../"
+require "lib/gcalcli"
+include CalendarReader
+class Controller < SimpleConsole::Controller
+  params :text => {:c => :calendar_url},
+       :string => {:h => :proxy_host},
+       :string => {:p => :proxy_port},
+       :string => {:u => :proxy_user},
+       :string => {:w => :proxy_pass},
+          :int => {:n => :number_days}
+  def default
+    @return_text = "How to"
+  end
+  def query
+    @return_text = ""
+    @calendar_url = params[:calendar_url]
+    @proxy_host   = params[:proxy_host]
+    @proxy_port   = params[:proxy_port]
+    @proxy_user   = params[:proxy_user]
+    @proxy_pass   = params[:proxy_pass]
+    @number_days  = params[:number_days]
+    cal = Calendar.new(@calendar_url,@proxy_host,@proxy_port,@proxy_user,@proxy_pass)
+    nrb_days_in_sec = @number_days * (60 * 60 * 24)
+    events = cal.events_in_range(Time.now, Time.now + nrb_days_in_sec)
+    events.collect do |event|
+      @return_text = @return_text + "#{event.start_time.strftime("%d/%m/%Y %I:%M%p") } - #{event.summary}\n"
+    end
+  end
+end
+
+class View < SimpleConsole::View
+  def default
+    puts @return_text
+  end
+  def query
+    puts @return_text
+  end
+end
+
+SimpleConsole::Application.run(ARGV, Controller, View)
