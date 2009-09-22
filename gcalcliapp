@@ -31,9 +31,9 @@ class Controller < SimpleConsole::Controller
     @number_days  = params[:number_days]
     cal = Calendar.new(@calendar_url,@proxy_host,@proxy_port,@proxy_user,@proxy_pass)
     nrb_days_in_sec = @number_days * (60 * 60 * 24)
-    events = cal.events_in_range(Time.now, Time.now + nrb_days_in_sec)
+    events = cal.events_in_range(DateTime.now, DateTime.now + nrb_days_in_sec)
     events.collect do |event|
-      @return_text = @return_text + "#{event.start_time.strftime("%d/%m/%Y %I:%M%p") } - #{event.summary}\n"
+      @return_text = @return_text + "#{event.dtstart.strftime("%d/%m/%Y %H:%M") } - #{event.summary}\n"
     end
   end
 end
