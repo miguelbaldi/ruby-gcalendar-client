@@ -12,7 +12,17 @@ class Controller < SimpleConsole::Controller
        :string => {:w => :proxy_pass},
           :int => {:n => :number_days}
   def default
-    @return_text = "How to"
+    @return_text = "gcalcliapp Usage: ruby gcalcliapp [action] [--options]\n"
+    @return_text = @return_text + "Available actions\n"
+    @return_text = @return_text + "   query                   Search given calendar forward -n number_days\n"
+    @return_text = @return_text + "Available options\n"
+    @return_text = @return_text + "  -c, --calendar_url       Google calendar URL\n"
+    @return_text = @return_text + "  -h, --proxy_host         Proxy host\n"
+    @return_text = @return_text + "  -p, --proxy_port         Proxy port\n"
+    @return_text = @return_text + "  -u, --proxy_user         Proxy username\n"
+    @return_text = @return_text + "  -w, --proxy_pass         Proxy password\n"
+    @return_text = @return_text + "  -n, --number_days        Number of days forward\n"
+    @return_text = @return_text + "  calendar_url paramter is mandatory!\n"
   end
   def query
     @return_text = ""
