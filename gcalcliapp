@@ -33,7 +33,7 @@ class Controller < SimpleConsole::Controller
     nrb_days_in_sec = @number_days * (60 * 60 * 24)
     events = cal.events_in_range(DateTime.now, DateTime.now + nrb_days_in_sec)
     events.collect do |event|
-      @return_text = @return_text + "#{event.dtstart.strftime("%d/%m/%Y %H:%M") } - #{event.summary}\n"
+      @return_text = @return_text + "#{event.dtstart.strftime("%b %d %Y %H:%M") } - #{event.summary}\n"
     end
   end
 end
