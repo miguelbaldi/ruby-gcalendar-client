@@ -29,10 +29,6 @@ class Controller < SimpleConsole::Controller
     @proxy_user   = params[:proxy_user]
     @proxy_pass   = params[:proxy_pass]
     @number_days  = params[:number_days]
-    params.each do |k,v|
-        puts "#{k}:#{v}"
-    end
-    puts "proxy #{@proxy_user}:#{@proxy_pass}@#{@proxy_host}:#{@proxy_port}\nurl #{@calendar_url}\nnro dias#{@number_days}"
     cal = Calendar.new(@calendar_url,@proxy_host,@proxy_port,@proxy_user,@proxy_pass)
     nrb_days_in_sec = @number_days * (60 * 60 * 24)
     events = cal.events_in_range(Time.now, Time.now + nrb_days_in_sec)

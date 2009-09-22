@@ -22,7 +22,6 @@ module CalendarReader
 
     def initialize(cal_url, proxy_host, proxy_port, proxy_user, proxy_pass)
       self.events = []
-      puts cal_url
       unless cal_url.empty?
         self.url = cal_url
         self.proxy_host=proxy_host
@@ -138,17 +137,15 @@ module CalendarReader
     def calendar_raw_data
       # If you need to use a proxy:
       unless self.proxy_host.nil?
-        Net::HTTP::Proxy(self.proxy_host, self.proxy_port,
-        self.proxy_user, self.proxy_pass).start('www.google.com', 80) do |http|
-          response = http.get(self.url)
-          case response
-          when Net::HTTPSuccess, Net::HTTPRedirection
-            #puts "Data #{data}"
-            return response.body 
-          else
-            response.error!
-            return nil
-          end
+        response = Net::HTTP::Proxy(self.proxy_host, self.proxy_port,
+        self.proxy_user, self.proxy_pass).get_response(URI.parse(self.url)) 
+        case response
+        when Net::HTTPSuccess, Net::HTTPRedirection
+          #puts "Data #{data}"
+          return response.body 
+        else
+          response.error!
+          return nil
         end
       else
         Net::HTTP.start('www.google.com', 80) do |http|
