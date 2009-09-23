@@ -1,9 +1,10 @@
-#!/usr/bin/env ruby -w
+#!/usr/bin/ruby -W0
+#!/usr/bin/env ruby -W0
 require "rubygems"
 require "simpleconsole"
 #require File.dirname(__FILE__) + "/../"
 require "lib/gcalcli"
-include CalendarReader
+include GCalendarReader
 class Controller < SimpleConsole::Controller
   params :text => {:c => :calendar_url},
        :string => {:h => :proxy_host, :p => :proxy_port, :u => :proxy_user, :w => :proxy_pass},
@@ -29,11 +30,11 @@ class Controller < SimpleConsole::Controller
     @proxy_user   = params[:proxy_user]
     @proxy_pass   = params[:proxy_pass]
     @number_days  = params[:number_days]
-    cal = Calendar.new(@calendar_url,@proxy_host,@proxy_port,@proxy_user,@proxy_pass)
     nrb_days_in_sec = @number_days * (60 * 60 * 24)
+    cal = Core.new(@calendar_url,@proxy_host,@proxy_port,@proxy_user,@proxy_pass,nrb_days_in_sec)
     events = cal.events_in_range(DateTime.now, DateTime.now + nrb_days_in_sec)
     events.collect do |event|
-      @return_text = @return_text + "#{event.dtstart.strftime("%b %d %Y %H:%M") } - #{event.summary}\n"
+      @return_text = @return_text + "#{event.start_time.strftime("%b %d %Y %H:%M") } - #{event.summary}\n"
     end
   end
 end

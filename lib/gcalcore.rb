@@ -2,29 +2,17 @@ require 'rubygems'
 require 'net/http'
 require 'uri'
 require 'time'
-require 'icalendar'
-require 'date'
-
-include Icalendar
-
-class Time
-  def self.gcalschema(tzid) # We may not be handling Time Zones in the best way...
-     tzid =~ /(\d\d\d\d)(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)Z/ ? # yyyymmddThhmmss
-       # Strange, sometimes it's 4 hours ahead, sometimes 4 hours behind. Need to figure out the timezone piece of ical.
-       # Time.xmlschema("#{$1}-#{$2}-#{$3}T#{$4}:#{$5}:#{$6}") - 4*60*60 :
-       Time.xmlschema("#{$1}-#{$2}-#{$3}T#{$4}:#{$5}:#{$6}") :
-       nil
-  end
-end
+require 'ri_cal'
+require "tzinfo"
 
 # include CalendarReader
 # g = Calendar.new('http://www.google.com/calendar/ical/example%40gmail.com/public/basic.ics')
-module CalendarReader
-  class Calendar
+module GCalendarReader
+  class Core
     attr_accessor :url, :ical, :xml, :product_id, :version, :scale, :method, :time_zone_name, :time_zone_offset, :events,
-                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass
+                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :limit_date
 
-    def initialize(cal_url, proxy_host, proxy_port, proxy_user, proxy_pass)
+    def initialize(cal_url, proxy_host, proxy_port, proxy_user, proxy_pass, nro_dias)
       self.events = []
       unless cal_url.empty?
         self.url = cal_url
@@ -32,6 +20,7 @@ module CalendarReader
         self.proxy_port=proxy_port
         self.proxy_user=proxy_user
         self.proxy_pass=proxy_pass
+        self.limit_date=Time.now + nro_dias
         self.parse!
       end
     end
@@ -39,7 +28,7 @@ module CalendarReader
     def add_event(event, sortit=true)
       self.events = [] unless self.events.is_a?(Array)
       self.events << event
-      @events.sort! {|a,b| a.dtstart <=> b.dtstart } if sortit
+      @events.sort! {|a,b| a.start_time <=> b.start_time } if sortit
       event
     end
 
@@ -63,15 +52,19 @@ module CalendarReader
 
     def parse_from_ical!
       rawdata = self.calendar_raw_data
-      cals = Icalendar.parse(rawdata)
+      cals = RiCal.parse_string(rawdata)
       cal = cals.first
-
-      # Now you can access the cal object in just the same way I created it
       cal.events.each do |event|
-        self.add_event(event, false) # (disable sorting until done)
-        @events.reject! {|e| e.dtstart.nil?}
-        @events.sort! {|a,b| a.dtstart <=> b.dtstart }
+        unless event.occurrences({:before => self.limit_date}).size > 1
+          self.add_event(event, false) # (disable sorting until done)
+        else
+          event.occurrences({:before => self.limit_date}).each do |ev|  
+            self.add_event(ev, false) # (disable sorting until done)
+          end
+        end
       end
+      @events.reject! {|e| e.start_time.nil?}
+      @events.sort! {|a,b| a.start_time <=> b.start_time }
     end
     def parse_from_ical
       self.dup.parse_from_ical
@@ -83,16 +76,16 @@ module CalendarReader
 
     def future_events
       t = DateTime.now
-      events.inject([]) {|future,e| e.dtstart > t ? future.push(e) : future}
+      events.inject([]) {|future,e| e.start_time > t ? future.push(e) : future}
     end
 
     def past_events
       t = DateTime.now
-      events.inject([]) {|past,e| e.dtstart < t ? past.push(e) : past}
+      events.inject([]) {|past,e| e.start_time < t ? past.push(e) : past}
     end
 
     def events_in_range(start_time, end_time)
-      events.inject([]) {|in_range,e| e.dtstart < end_time && e.dtend > start_time ? in_range.push(e) : in_range}
+      events.inject([]) {|in_range,e| e.start_time < end_time && e.finish_time > start_time ? in_range.push(e) : in_range}
     end
 
     def calendar_raw_data
