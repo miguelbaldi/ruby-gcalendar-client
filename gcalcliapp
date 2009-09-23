@@ -3,7 +3,7 @@
 require "rubygems"
 require "simpleconsole"
 #require File.dirname(__FILE__) + "/../"
-require "lib/gcalcli"
+require "lib/gcalcore"
 include GCalendarReader
 class Controller < SimpleConsole::Controller
   params :text => {:c => :calendar_url},
@@ -30,12 +30,17 @@ class Controller < SimpleConsole::Controller
     @proxy_user   = params[:proxy_user]
     @proxy_pass   = params[:proxy_pass]
     @number_days  = params[:number_days]
-    nrb_days_in_sec = @number_days * (60 * 60 * 24)
-    cal = Core.new(@calendar_url,@proxy_host,@proxy_port,@proxy_user,@proxy_pass,nrb_days_in_sec)
-    events = cal.events_in_range(DateTime.now, DateTime.now + nrb_days_in_sec)
-    events.collect do |event|
-      @return_text = @return_text + "#{event.start_time.strftime("%b %d %Y %H:%M") } - #{event.summary}\n"
+    unless @calendar_url.nil? || @number_days.nil?
+      nrb_days_in_sec = @number_days * (60 * 60 * 24)
+      cal = Core.new(@calendar_url,@proxy_host,@proxy_port,@proxy_user,@proxy_pass,nrb_days_in_sec)
+      events = cal.events_in_range(DateTime.now, DateTime.now + nrb_days_in_sec)
+      events.collect do |event|
+        @return_text = @return_text + "#{event.start_time.strftime("%b %d %Y %H:%M") } - #{event.summary}\n"
+      end
+    else
+      @return_text = "--calendar_url and --number_days parameters must not be empty!"
     end
+    
   end
 end
 
