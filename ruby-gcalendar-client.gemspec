@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.description = %q{GCalCli is a client for Google Calendar service.}
   s.email = %q{miguel.horlle@gmailcom}
   s.extra_rdoc_files = ["README", "LICENSE"]
-  s.files = ["README.md", "VERSION.yml", "gcalcliapp", "lib/gcalcore.rb", "LICENSE"]
+  s.files = ["README", "VERSION.yml", "gcalcliapp", "lib/gcalcore.rb", "LICENSE"]
   s.has_rdoc = false 
   s.homepage = %q{http://github.com/miguelbaldi/ruby-gcalendar-client}
   s.rdoc_options = ["--inline-source", "--charset=UTF-8"]
