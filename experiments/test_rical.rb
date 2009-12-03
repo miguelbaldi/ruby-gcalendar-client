@@ -1,0 +1,67 @@
+require 'rubygems'
+require 'net/http'
+require 'uri'
+require 'time'
+require 'ri_cal'
+require "tzinfo"
+
+rawdata = <<END_STR
+BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:RICal teste
+X-WR-TIMEZONE:America/Sao_Paulo
+X-WR-CALDESC:
+BEGIN:VTIMEZONE
+TZID:America/Sao_Paulo
+X-LIC-LOCATION:America/Sao_Paulo
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0300
+TZOFFSETTO:-0200
+TZNAME:BRST
+DTSTART:19701018T000000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=3SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0300
+TZOFFSETTO:-0300
+TZNAME:BRT
+DTSTART:19700215T000000
+RRULE:FREQ=YEARLY;BYMONTH=2;BYDAY=3SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:19400713
+DTEND;VALUE=DATE:19400714
+RRULE:FREQ=YEARLY;BYMONTH=7;BYMONTHDAY=13
+DTSTAMP:20091109T161426Z
+UID:CD0000008B9511D182D800C04FB1625DF48568F41595384496C2570C025DC032
+CREATED:20090924T160743Z
+DESCRIPTION: Description test 12
+LAST-MODIFIED:20090924T160945Z
+LOCATION: Location test 12
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY: Event test 12
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
+END_STR
+cals = RiCal.parse_string(rawdata)
+puts "Parsing executed!"
+cal = cals.first
+cal.events.each do |event|
+  unless event.recurs?
+    puts "Dont recurs!"
+  else
+    puts "Recurs!"
+    occrs = event.occurrences({:count => 10})
+    puts "Occurrences size #{occrs.size}"
+    occrs.each do |ev|
+      puts "Event #{ev.summary}"
+    end
+  end
+end
+puts "Events collected!"

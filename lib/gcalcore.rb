@@ -4,15 +4,18 @@ require 'uri'
 require 'time'
 require 'ri_cal'
 require "tzinfo"
+require 'logger'
 
-# include CalendarReader
-# g = Calendar.new('http://www.google.com/calendar/ical/example%40gmail.com/public/basic.ics')
+RiCal.debug=true
+
 module GCalendarReader
+  @log = Logger.new( 'gcal-core.log', 'daily' )
   class Core
     attr_accessor :url, :ical, :xml, :product_id, :version, :scale, :method, :time_zone_name, :time_zone_offset, :events,
                   :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :limit_date
 
     def initialize(cal_url, proxy_host, proxy_port, proxy_user, proxy_pass, nro_dias)
+      @log = Logger.new( 'gcal-core.log', 'daily' )
       self.events = []
       unless cal_url.empty?
         self.url = cal_url
@@ -52,17 +55,28 @@ module GCalendarReader
 
     def parse_from_ical!
       rawdata = self.calendar_raw_data
+      RiCal.debug=true
       cals = RiCal.parse_string(rawdata)
+      @log.debug "Parsing executed!"
       cal = cals.first
       cal.events.each do |event|
-        unless event.occurrences({:before => self.limit_date}).size > 1
+        @log.debug "Processing event #{event.summary}"
+        @log.debug "Start date #{event.dtstart.strftime("%b %d %Y %H:%M")}"
+        @log.debug "End date #{event.dtend.strftime("%b %d %Y %H:%M")}"
+        @log.debug "Limit date #{self.limit_date.strftime("%b %d %Y %H:%M")}"
+        unless event.recurs?
+          @log.debug "Dont recurs!"
           self.add_event(event, false) # (disable sorting until done)
         else
-          event.occurrences({:before => self.limit_date}).each do |ev|  
+          @log.debug "Recurs!"
+          occrs = event.occurrences({:before => self.limit_date})
+          @log.debug "Occurrences size #{occrs.size}"
+          occrs.each do |ev|  
             self.add_event(ev, false) # (disable sorting until done)
           end
         end
       end
+      @log.debug "Events collected!"
       @events.reject! {|e| e.start_time.nil?}
       @events.sort! {|a,b| a.start_time <=> b.start_time }
     end
@@ -91,6 +105,7 @@ module GCalendarReader
     def calendar_raw_data
       # If you need to use a proxy:
       unless self.proxy_host.nil?
+        @log.debug "host #{self.proxy_host} \nport #{self.proxy_port} \nuser #{self.proxy_user} \nurl #{self.url}"
         response = Net::HTTP::Proxy(self.proxy_host, self.proxy_port,
         self.proxy_user, self.proxy_pass).get_response(URI.parse(self.url)) 
         case response

@@ -4,7 +4,7 @@ require 'uri'
 require 'ri_cal'
 require 'tzinfo'
 
-url='http://www.google.com/calendar/ical/miguel.horlle%40gmail.com/private-9562d0b3d7d34a0987adee46ce8175ff/basic.ics'
+url='http://www.google.com/calendar/ical/a2ggmvntf88dbr5o4mvc3grsv8%40group.calendar.google.com/private-bcd589978d4134672827a9988c35cfa8/basic.ics'
 # Net::HTTP::Proxy(proxy_host, proxy_port, proxy_user, proxy_pass).start('www.google.com', 80) do |http|
 response = Net::HTTP.get_response(URI.parse(url))
 case response
