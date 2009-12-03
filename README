@@ -1,11 +1,8 @@
-Para utilizar o cliente google calendar, primeiro vocÃª deve instalar suas dependÃncias:
-  SimpleConsole, execute isso no terminal
-        sudo gem install -p http://192.168.160.3:8080 simpleconsole --remote
-  RiCal
-        sudo gem install -p http://192.168.160.3:8080 ri_cal --remote
-  TzInfo
-        sudo gem install -p http://192.168.160.3:8080 tzinfo --remote
+Para utilizar o cliente google calendar, basta executar:
+      gem sources -a http://gems.github.com
+      sudo gem install miguelbaldi-gcalcliapp
 
-Depois de instalar as dependencias, basta rodar o programa desta forma:
+
+Depois de instalar, basta rodar o programa desta forma:
         ruby gcalcliapp
 Desta forma ele deve mostra a mensagem de help
